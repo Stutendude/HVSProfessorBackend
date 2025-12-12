@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Professorenverwaltung</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+        body { font-family: Arial, sans-serif; margin: 24px; }
+        form { margin-bottom: 16px; }
+        input, button { padding: 8px; margin: 4px 0; display: block; }
+        table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+    </style>
+</head>
+<body>
+<h1>Professorenverwaltung</h1>
+
+<form id="prof-form">
+    <input type="hidden" id="prof-id" />
+    <label>Vorname: <input id="firstname" required /></label>
+    <label>Nachname: <input id="lastname" required /></label>
+    <label>Email: <input id="email" type="email" /></label>
+    <label>Lehrstuhl: <input id="chair" /></label>
+    <button type="submit">Speichern</button>
+    <button type="button" id="reset">Neu</button>
+</form>
+
+<div>
+    <button id="reload">Liste laden</button>
+    <table id="list">
+        <thead><tr><th>ID</th><th>Vorname</th><th>Nachname</th><th>Email</th><th>Lehrstuhl</th><th>Aktionen</th></tr></thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

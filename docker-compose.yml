@@ -1,0 +1,34 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: profuser
+      POSTGRES_PASSWORD: profpass
+      POSTGRES_DB: profdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432" # hier müssen noch die richtigen ports rein wenn ich die erhalten habe
+
+  backend:
+    build: .
+    depends_on:
+      - postgres
+    environment:
+      PGHOST: postgres
+      PGUSER: profuser
+      PGPASSWORD: profpass
+      PGDATABASE: profdb
+      PGPORT: "5432" # hier müssen noch die richtigen ports rein wenn ich die erhalten habe
+      ADMIN_PORT: "3000"
+      METRICS_PORT: "3001"
+    ports:
+      - "3000:3000"   # HTML + CRUD
+      - "3001:3001"   # metrics endpoint
+    volumes:
+      - ./src/public:/usr/src/app/public:ro
+
+volumes:
+  pgdata:
