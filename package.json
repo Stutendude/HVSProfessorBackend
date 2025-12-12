@@ -3,7 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "build": "tsc",
+    "start": "node dist/server_admin.js",
+    "start:metrics": "node dist/server_metrics.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/server_admin.ts",
+    "dev:metrics": "ts-node-dev --respawn --transpile-only src/server_metrics.ts"
   },
   "dependencies": {
     "body-parser": "^1.20.2",
