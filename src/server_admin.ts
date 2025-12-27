@@ -12,7 +12,9 @@ const app = express();
 // public serving
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, "public")));
+const publicPath = path.join(__dirname, "..", "src", "public");
+app.use(express.static(publicPath));
+
 
 // REST: list
 app.get("/api/professors", async (req, res) => {
@@ -118,7 +120,7 @@ app.delete("/api/professors/:id", async (req, res) => {
 
 // Serve the HTML file on root
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "index.html"));
+    res.sendFile(path.join(publicPath, "index.html"));
 });
 
 app.listen(ADMIN_PORT, () => {

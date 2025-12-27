@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "build": "tsc",
-    "start": "node src/server_admin.ts",
-    "start:metrics": "node src/server_metrics.js",
+    "start": "node dist/server_admin.js",
+    "start:metrics": "node dist/server_metrics.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server_admin.ts",
     "dev:metrics": "ts-node-dev --respawn --transpile-only src/server_metrics.ts"
   },
