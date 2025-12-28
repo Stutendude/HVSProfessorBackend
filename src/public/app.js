@@ -28,10 +28,9 @@ document.getElementById("prof-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const id = document.getElementById("prof-id").value;
     const body = {
-        firstname: document.getElementById("firstname").value,
-        lastname: document.getElementById("lastname").value,
-        email: document.getElementById("email").value,
-        chair: document.getElementById("chair").value
+        first: document.getElementById("first").value,
+        last: document.getElementById("last").value,
+        email: document.getElementById("email").value
     };
     if (id) {
         const res = await fetch(API + "/" + id, {
@@ -56,8 +55,8 @@ document.getElementById("reset").addEventListener("click", resetForm);
 
 function resetForm(){
     document.getElementById("prof-id").value = "";
-    document.getElementById("firstname").value = "";
-    document.getElementById("lastname").value = "";
+    document.getElementById("first").value = "";
+    document.getElementById("last").value = "";
     document.getElementById("email").value = "";
 }
 
@@ -67,8 +66,8 @@ document.querySelector("#list tbody").addEventListener("click", async (e) => {
         const res = await fetch(API + "/" + id);
         const p = await res.json();
         document.getElementById("prof-id").value = p.id;
-        document.getElementById("firstname").value = p.firstname;
-        document.getElementById("lastname").value = p.lastname;
+        document.getElementById("first").value = p.firstname;
+        document.getElementById("last").value = p.lastname;
         document.getElementById("email").value = p.email || "";
     } else if (e.target.classList.contains("delete")) {
         const id = e.target.dataset.id;

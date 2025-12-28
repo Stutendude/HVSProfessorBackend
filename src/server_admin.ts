@@ -2,52 +2,63 @@ import express from "express";
 import path from "path";
 import bodyParser from "body-parser";
 import cors from "cors";
+import http from "http";
 import { connectMongo, Professors, Commands, toObjectId } from "./db";
 
-//ist bis jetzt nur chatgpt generiert... bin noch unzufrieden wie ein paar sachen gemacht wurden muss nochmal überarbeitet werden
-//das script kümmert sich um den Port 3000 also die html die der nutzer sieht um die datenbank zu bearbeiten
 const ADMIN_PORT = Number(process.env.ADMIN_PORT || 3000);
 const app = express();
 
-// public serving
+/* =========================
+   Middleware
+========================= */
 app.use(cors());
 app.use(bodyParser.json());
+
 const publicPath = path.join(__dirname, "..", "src", "public");
 app.use(express.static(publicPath));
 
+/* =========================
+   Helper
+========================= */
+function mapProfessor(p: any) {
+    return {
+        id: p._id.toString(),
+        firstname: p.first,
+        lastname: p.last,
+        email: p.email ?? ""
+    };
+}
 
-// REST: list
-app.get("/api/professors", async (req, res) => {
-    if(!Professors) {
-        console.log(`MongoDB not found`);
-        return res.status(404).json({error: "DB not found"});
-    }else
-        res.json(await Professors.find().toArray());
+/* =========================
+   REST API
+========================= */
+
+// GET all
+app.get("/api/professors", async (_req, res) => {
+    const list = await Professors.find().toArray();
+    res.json(list.map(mapProfessor));
 });
 
-
-
-// REST: get single
+// GET one
 app.get("/api/professors/:id", async (req, res) => {
-    if(!Professors) {
-        console.log(`MongoDB not found`);
-        return res.status(404).json({error: "DB not found"});
+    const prof = await Professors.findOne({
+        _id: toObjectId(req.params.id),
+    });
+
+    if (!prof) {
+        return res.status(404).json({ error: "not found" });
     }
 
-    const prof = await Professors.findOne({ _id: toObjectId(req.params.id) });
-    if (!prof) return res.status(404).json({ error: "not found" });
-    res.json(prof);
+    res.json(mapProfessor(prof));
 });
 
-
-// REST: create (also write command JSON to commands table)
+// CREATE
 app.post("/api/professors", async (req, res) => {
-    if(!Professors) {
-        console.log(`MongoDB not found`);
-        return res.status(404).json({error: "DB not found"});
-    }
-
-    const payload = req.body;
+    const payload = {
+        first: req.body.first,
+        last: req.body.last,
+        email: req.body.email,
+    };
 
     const result = await Professors.insertOne(payload);
 
@@ -60,26 +71,20 @@ app.post("/api/professors", async (req, res) => {
         timestamp: new Date(),
     });
 
-    res.status(201).json(created);
+    res.status(201).json(mapProfessor(created));
 });
 
-
-// REST: update
+// UPDATE
 app.put("/api/professors/:id", async (req, res) => {
-    if(!Professors) {
-        console.log(`MongoDB not found`);
-        return res.status(404).json({error: "DB not found"});
-    }
-
-    const id = toObjectId(req.params.id);
-
     const result = await Professors.findOneAndUpdate(
-        { _id: id },
+        { _id: toObjectId(req.params.id) },
         { $set: req.body },
         { returnDocument: "after" }
     );
 
-    if (!result || !result.value) return res.status(404).json({ error: "not found" });
+    if (!result || !result.value) {
+        return res.status(404).json({ error: "not found" });
+    }
 
     await Commands.insertOne({
         action: "update",
@@ -88,43 +93,56 @@ app.put("/api/professors/:id", async (req, res) => {
         timestamp: new Date(),
     });
 
-    res.json(result.value);
+    res.json(mapProfessor(result.value));
 });
 
-
-// REST: delete
+// DELETE
 app.delete("/api/professors/:id", async (req, res) => {
-    if(!Professors) {
-        console.log(`MongoDB not found`);
-        return res.status(404).json({error: "DB not found"});
+    const result = await Professors.findOneAndDelete({
+        _id: toObjectId(req.params.id),
+    });
+
+    if (!result || !result.value) {
+        return res.status(404).json({ error: "not found" });
     }
-
-    const id = toObjectId(req.params.id);
-
-    const prof = await Professors.findOneAndDelete({ _id: id });
-    if (!prof || !prof.value) return res.status(404).json({ error: "not found" });
 
     await Commands.insertOne({
         action: "delete",
         target: "professor",
-        payload: { _id: id },
+        payload: { _id: req.params.id },
         timestamp: new Date(),
     });
 
     res.json({ success: true });
 });
 
-
-// Serve the HTML file on root
-app.get("/", (req, res) => {
+/* =========================
+   HTML Root
+========================= */
+app.get("/", (_req, res) => {
     res.sendFile(path.join(publicPath, "index.html"));
 });
 
-app.listen(ADMIN_PORT, () => {
-    //Mongo wird verbunden
-    console.log(`waiting for MongoDB`);
-    (async () => {
-        await connectMongo();
-        console.log(`Listening on Port ${ADMIN_PORT} with MongoDB`);
-    })();
+/* =========================
+   Server Startup
+========================= */
+const server = http.createServer(app);
+
+server.on("error", (err: NodeJS.ErrnoException) => {
+    if (err.code === "EADDRINUSE") {
+        console.error(`Port ${ADMIN_PORT} already in use`);
+    } else {
+        console.error("Server error:", err);
+    }
+    process.exit(1);
 });
+
+(async () => {
+    console.log("waiting for MongoDB");
+    await connectMongo();
+    console.log("Connected to MongoDB Replica Set");
+
+    server.listen(ADMIN_PORT, () => {
+        console.log(`Admin server listening on port ${ADMIN_PORT}`);
+    });
+})();
