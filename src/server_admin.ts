@@ -122,9 +122,9 @@ app.get("/", (req, res) => {
 
 app.listen(ADMIN_PORT, () => {
     //Mongo wird verbunden
+    console.log(`waiting for MongoDB`);
     (async () => {
         await connectMongo();
+        console.log(`Listening on Port ${ADMIN_PORT} with MongoDB`);
     })();
-
-    console.log(`waiting for MongoDB`);
 });
