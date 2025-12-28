@@ -25,7 +25,7 @@ export async function connectMongo(): Promise<void> {
     Professors = db.collection("professors");
     Commands = db.collection("commands");
 
-    console.log("✅ Connected to MongoDB Replica Set");
+    console.log("Connected to MongoDB Replica Set");
 }
 
 export function toObjectId(id: string): ObjectId {
