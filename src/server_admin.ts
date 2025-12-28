@@ -98,7 +98,6 @@ app.get("/", (req, res) => {
 });
 
 app.listen(ADMIN_PORT, () => {
-    //TODO: loggen
     //Mongo wird verbunden
     (async () => {
         await connectMongo();
@@ -107,6 +106,4 @@ app.listen(ADMIN_PORT, () => {
             console.log(`Admin server listening on port ${ADMIN_PORT}`);
         });
     })();
-
-    console.log(`Admin server listening on port ${ADMIN_PORT}`);
 });
