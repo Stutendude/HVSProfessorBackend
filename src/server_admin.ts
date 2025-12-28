@@ -18,14 +18,22 @@ app.use(express.static(publicPath));
 
 // REST: list
 app.get("/api/professors", async (req, res) => {
-    const list = await Professors.find().toArray();
-    res.json(list);
+    if(!Professors) {
+        console.log(`MongoDB not found`);
+        return res.status(404).json({error: "DB not found"});
+    }else
+        res.json(await Professors.find().toArray());
 });
 
 
 
 // REST: get single
 app.get("/api/professors/:id", async (req, res) => {
+    if(!Professors) {
+        console.log(`MongoDB not found`);
+        return res.status(404).json({error: "DB not found"});
+    }
+
     const prof = await Professors.findOne({ _id: toObjectId(req.params.id) });
     if (!prof) return res.status(404).json({ error: "not found" });
     res.json(prof);
@@ -34,6 +42,11 @@ app.get("/api/professors/:id", async (req, res) => {
 
 // REST: create (also write command JSON to commands table)
 app.post("/api/professors", async (req, res) => {
+    if(!Professors) {
+        console.log(`MongoDB not found`);
+        return res.status(404).json({error: "DB not found"});
+    }
+
     const payload = req.body;
 
     const result = await Professors.insertOne(payload);
@@ -53,6 +66,11 @@ app.post("/api/professors", async (req, res) => {
 
 // REST: update
 app.put("/api/professors/:id", async (req, res) => {
+    if(!Professors) {
+        console.log(`MongoDB not found`);
+        return res.status(404).json({error: "DB not found"});
+    }
+
     const id = toObjectId(req.params.id);
 
     const result = await Professors.findOneAndUpdate(
@@ -76,6 +94,11 @@ app.put("/api/professors/:id", async (req, res) => {
 
 // REST: delete
 app.delete("/api/professors/:id", async (req, res) => {
+    if(!Professors) {
+        console.log(`MongoDB not found`);
+        return res.status(404).json({error: "DB not found"});
+    }
+
     const id = toObjectId(req.params.id);
 
     const prof = await Professors.findOneAndDelete({ _id: id });
@@ -106,4 +129,6 @@ app.listen(ADMIN_PORT, () => {
             console.log(`Admin server listening on port ${ADMIN_PORT}`);
         });
     })();
+
+    console.log(`Admin server listening without MongoDB on port ${ADMIN_PORT}`);
 });
