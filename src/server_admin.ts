@@ -6,7 +6,7 @@ import { connectMongo, Professors, Commands, toObjectId } from "./db";
 
 //ist bis jetzt nur chatgpt generiert... bin noch unzufrieden wie ein paar sachen gemacht wurden muss nochmal überarbeitet werden
 //das script kümmert sich um den Port 3000 also die html die der nutzer sieht um die datenbank zu bearbeiten
-const ADMIN_PORT = Number(process.env.ADMIN_PORT || 3005);
+const ADMIN_PORT = Number(process.env.ADMIN_PORT || 3000);
 const app = express();
 
 // public serving
@@ -124,10 +124,6 @@ app.listen(ADMIN_PORT, () => {
     //Mongo wird verbunden
     (async () => {
         await connectMongo();
-
-        app.listen(ADMIN_PORT, () => {
-            console.log(`Admin server listening on port ${ADMIN_PORT}`);
-        });
     })();
 
     console.log(`waiting for MongoDB`);
